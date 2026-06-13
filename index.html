@@ -1001,9 +1001,9 @@ function closeDetailModal() {
 // TESLA API
 // ══════════════════════════════════════════
 const TESLA_BASE = {
-  eu: 'https://fleet-api.prd.eu.vn.cloud.tesla.com',
-  na: 'https://fleet-api.prd.na.vn.cloud.tesla.com',
-  fe: 'https://fleet-api.prd.fe.vn.cloud.tesla.com',
+  eu: '/fleet-eu',
+  na: '/fleet-na',
+  fe: '/fleet-fe',
 };
 const TESLA_AUTH_URL = 'https://auth.tesla.com/oauth2/v3/authorize';
 const TESLA_TOKEN_URL = 'https://auth.tesla.com/oauth2/v3/token';
@@ -1476,7 +1476,7 @@ function importCSV() {
       const iKwh = idx('kWh'), iPurp = idx('Syfte'), iVeh = idx('Fordon'), iNote = idx('Anteckning');
       let count = 0;
       const trips = getTrips();
-      const existing = new Set(trips.map(t => (t.date||'')+'|'+(t.startAddr||'')+'|'+(t.endAddr||'')));
+      const existing = new Set(trips.map(t => (t.date||'')+'|'+(t.startTime||'')+'|'+(t.km||0)));
       for (let i = 1; i < lines.length; i++) {
         const cols = parseCSVLine(lines[i]);
         if (cols.length < 4) continue;
@@ -1493,7 +1493,7 @@ function importCSV() {
           vehicle: iVeh>=0 ? cols[iVeh] : '',
           note: iNote>=0 ? cols[iNote] : ''
         };
-        const key = trip.date+'|'+trip.startAddr+'|'+trip.endAddr;
+        const key = trip.date+'|'+trip.startTime+'|'+trip.km;
         if (!existing.has(key)) { trips.push(trip); existing.add(key); count++; }
       }
       saveTrips(trips); renderOverview();
