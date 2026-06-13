@@ -180,34 +180,6 @@ textarea{resize:vertical;min-height:72px}
   nav button span{display:none}
   main{padding:16px}
 }
-
-/* ── MOBILE ── */
-@media(max-width:600px){
-  header{padding:0 12px;height:54px;gap:10px}
-  .logo span{display:none}
-  nav button{padding:6px 10px;font-size:12px}
-  main{padding:12px}
-  .stats{grid-template-columns:1fr 1fr}
-  .stat{padding:14px}
-  .stat-val{font-size:22px}
-  .form-grid,.grid-2,.detail-grid{grid-template-columns:1fr}
-  .sh{flex-direction:column;align-items:flex-start;gap:10px}
-}
-
-/* ── AUTOLOG ── */
-.autolog-panel{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px}
-.autolog-status{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.autolog-dot{width:12px;height:12px;border-radius:50%;background:#444;flex-shrink:0}
-.autolog-dot.active{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
-.autolog-dot.driving{background:var(--yellow);box-shadow:0 0 8px var(--yellow);animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.autolog-info{flex:1}
-.autolog-title{font-weight:600;font-size:15px}
-.autolog-sub{font-size:12px;color:var(--muted);margin-top:2px}
-.autolog-trips{margin-top:12px;max-height:300px;overflow-y:auto}
-.autolog-trip-item{background:var(--bg3);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid var(--green)}
-.autolog-trip-item.pending{border-left-color:var(--yellow)}
-
 </style>
 </head>
 <body>
@@ -322,30 +294,22 @@ textarea{resize:vertical;min-height:72px}
             <input type="time" id="f-end-time">
           </div>
           <div class="fg full">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-              <label style="margin:0">Startadress</label>
-              <button type="button" class="btn-ghost" style="font-size:11px;padding:2px 6px" onclick="addFav('start')">⭐ Spara</button>
-            </div>
+            <label>Startadress</label>
             <div class="ac-wrap">
               <input type="text" id="f-start-addr" placeholder="Sök adress..." autocomplete="off" oninput="geocodeInput('start')" required>
               <div class="ac-list" id="ac-start"></div>
             </div>
             <input type="hidden" id="f-start-lat">
             <input type="hidden" id="f-start-lng">
-            <div id="fav-chips-start" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px"></div>
           </div>
           <div class="fg full">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-              <label style="margin:0">Slutadress</label>
-              <button type="button" class="btn-ghost" style="font-size:11px;padding:2px 6px" onclick="addFav('end')">⭐ Spara</button>
-            </div>
+            <label>Slutadress</label>
             <div class="ac-wrap">
               <input type="text" id="f-end-addr" placeholder="Sök adress..." autocomplete="off" oninput="geocodeInput('end')" required>
               <div class="ac-list" id="ac-end"></div>
             </div>
             <input type="hidden" id="f-end-lat">
             <input type="hidden" id="f-end-lng">
-            <div id="fav-chips-end" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px"></div>
           </div>
           <div class="fg">
             <label>Avstånd (km)</label>
@@ -435,7 +399,7 @@ textarea{resize:vertical;min-height:72px}
         </div>
         <div class="fg full">
           <label>Redirect URI <span style="font-weight:400;color:var(--muted)">(samma som registrerat hos Tesla)</span></label>
-          <input type="text" id="ts-redirect-uri" placeholder="https://din-app.netlify.app/callback.html" value="">
+          <input type="text" id="ts-redirect-uri" placeholder="https://din-app.netlify.app/callback.html">
         </div>
         <div class="fg full">
           <label>Client Secret <span style="font-weight:400;color:var(--muted)">(från developer.tesla.com)</span></label>
@@ -445,9 +409,32 @@ textarea{resize:vertical;min-height:72px}
       <button class="btn btn-primary" onclick="tsOAuthLogin()">🔑 Öppna Tesla-inloggning</button>
     </div>
 
-    <!-- Anslut med token (fallback) -->
-    <div class="card mb-16" style="margin-top:8px">
-      <button class="btn btn-sec" onclick="tsConnectManual()">⚡ Anslut med token manuellt</button>
+    <!-- Steg 2 -->
+    <div class="card mb-16" id="step2-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:28px;height:28px;background:var(--bg3);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;color:var(--muted)" id="step2-num">2</div>
+        <h3 style="color:var(--muted)" id="step2-title">Klistra in adressen efter inloggning</h3>
+      </div>
+      <p class="text-muted mb-16" style="font-size:13px;line-height:1.6">
+        Efter att du loggat in hos Tesla visas ett fel i webbläsaren — det är <strong style="color:var(--text)">normalt</strong>.
+        Kopiera då hela adressen från adressfältet (den börjar med <code style="background:var(--bg3);padding:1px 6px;border-radius:4px">http://localhost...</code>) och klistra in här:
+      </p>
+      <div class="fg mb-16">
+        <label>Adress från webbläsarens adressfält</label>
+        <input type="text" id="ts-callback-url" placeholder="http://localhost:8080/tesla_korjournal.html?code=abc123&state=...">
+      </div>
+      <button class="btn btn-primary" onclick="tsHandleManualCallback()">✅ Slutför inloggning</button>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">
+      <button class="btn-ghost" onclick="toggleManualToken()" style="font-size:13px">Har du redan en access token? →</button>
+      <div id="manual-token-box" style="display:none;margin-top:14px">
+        <div class="fg mb-16">
+          <label>Access Token</label>
+          <input type="password" id="ts-token-input" placeholder="Klistra in din Tesla access token...">
+        </div>
+        <button class="btn btn-sec" onclick="tsConnectManual()">⚡ Anslut med token</button>
+      </div>
     </div>
   </div>
 
@@ -460,30 +447,18 @@ textarea{resize:vertical;min-height:72px}
 
   <!-- Import tab -->
   <div id="ts-tab-import" style="display:none">
-
-    <!-- AUTO LOG PANEL -->
-    <div class="autolog-panel">
-      <div class="autolog-status">
-        <div class="autolog-dot" id="al-dot"></div>
-        <div class="autolog-info">
-          <div class="autolog-title" id="al-title">Autologgning inaktiv</div>
-          <div class="autolog-sub" id="al-sub">Startar automatisk resinspelning</div>
-        </div>
-        <button class="btn btn-primary" id="al-btn" onclick="autoLogToggle()" style="white-space:nowrap">▶ Starta</button>
-      </div>
-      <div id="al-trips-list"></div>
-    </div>
-
-    <!-- MANUAL FETCH -->
     <div class="sh" style="margin-bottom:14px">
-      <h3>Hämta fordonsdata manuellt</h3>
-      <button class="btn btn-sec" onclick="tsFetchVehicleData()" id="ts-fetch-btn">🔄 Hämta fordonsdata</button>
+      <h3>Laddningar som resor</h3>
+      <button class="btn btn-sec" onclick="tsFetchCharges()" id="ts-fetch-btn">🔄 Hämta data</button>
     </div>
     <div class="warn-box mb-16">
-      Hämtar aktuell position och odometer från din Tesla. Använd "Starta resa härifrån" för att automatiskt fylla i startadressen i resformuläret.
+      Tesla Fleet API exponerar laddningssessioner med plats och tid. Dessa kan importeras som resor och sedan kompletteras manuellt med startadress och syfte.
     </div>
-    <div id="ts-vehicle-data-panel">
-      <div class="empty"><div class="icon">🚗</div><h3>Tryck "Hämta fordonsdata"</h3><p>Hämtar aktuell position och körsträcka från din Tesla.</p></div>
+    <div id="ts-import-list">
+      <div class="empty"><div class="icon">⚡</div><h3>Tryck "Hämta data"</h3><p>Hämtar de senaste laddningssessionerna från din Tesla.</p></div>
+    </div>
+    <div id="ts-import-actions" style="display:none;margin-top:14px">
+      <button class="btn btn-primary" onclick="tsImportSelected()">📥 Importera markerade</button>
     </div>
   </div>
 
@@ -521,11 +496,6 @@ EOF</pre>
       <p class="text-muted mb-16">Exportera resor från TeslaFi, Teslascope eller eget skript som JSON och importera här:</p>
       <input type="file" id="json-import-file" accept=".json" style="margin-bottom:12px">
       <button class="btn btn-sec" onclick="importJSON()">📂 Importera JSON</button>
-      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-        <p class="text-muted mb-16">Importera från CSV (t.ex. exporterad från denna app):</p>
-        <input type="file" id="csv-import-file" accept=".csv" style="margin-bottom:12px">
-        <button class="btn btn-sec" onclick="importCSV()">📂 Importera CSV</button>
-      </div>
     </div>
   </div>
 </div>
@@ -578,6 +548,15 @@ EOF</pre>
       </div>
     </div>
   </div>
+  <!-- CSV IMPORT -->
+  <div class="card mt-16" style="margin-top:16px">
+    <h3 style="margin-bottom:12px">📂 Importera resor från CSV</h3>
+    <p class="text-muted mb-16" style="margin-bottom:12px">Importera CSV-fil exporterad från denna app (t.ex. från Netlify-versionen). Duplicerade resor hoppas över automatiskt.</p>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <input type="file" id="csv-import-file" accept=".csv" style="flex:1;min-width:200px">
+      <button class="btn btn-primary" onclick="importCSV()" style="white-space:nowrap">📂 Importera CSV</button>
+    </div>
+  </div>
 </div>
 
 </main>
@@ -628,7 +607,7 @@ function nav(view) {
   currentView = view;
   if (view === 'overview') renderOverview();
   if (view === 'trips') renderTrips();
-  if (view === 'add') { resetForm(); setTimeout(() => { initFormMap(); renderFavChips(); }, 100); }
+  if (view === 'add') { resetForm(); setTimeout(initFormMap, 100); }
   if (view === 'export') renderExportPreview();
 }
 
@@ -655,36 +634,27 @@ function renderOverview() {
   const totalKwh = trips.reduce((s,t)=>s+(+t.kwh||0),0);
   const pct = totalKm>0 ? Math.round(bizKm/totalKm*100) : 0;
 
-  const now = new Date();
-  const thisMonth = now.toISOString().slice(0,7);
-  const thisYear = now.getFullYear().toString();
-  const monthTrips = trips.filter(t => t.date.startsWith(thisMonth));
-  const yearTrips = trips.filter(t => t.date.startsWith(thisYear));
-  const monthKm = monthTrips.reduce((s,t)=>s+(+t.km||0),0);
-  const yearKm = yearTrips.reduce((s,t)=>s+(+t.km||0),0);
-  const yearBizKm = yearTrips.filter(t=>t.purpose==='tjänst').reduce((s,t)=>s+(+t.km||0),0);
-  const skatteavdrag = Math.round(yearBizKm * 0.25);
   document.getElementById('stats-grid').innerHTML = `
     <div class="stat">
-      <div class="stat-label">Totalt resor</div>
+      <div class="stat-label">Totalt antal resor</div>
       <div class="stat-val">${trips.length}</div>
       <div class="stat-sub">${trips.filter(t=>t.purpose==='tjänst').length} tjänst · ${trips.filter(t=>t.purpose==='privat').length} privat</div>
     </div>
     <div class="stat">
-      <div class="stat-label">Denna månad</div>
-      <div class="stat-val">${fmtKm(monthKm)}</div>
-      <div class="stat-sub">${monthTrips.length} resor · ${fmtKm(monthTrips.filter(t=>t.purpose==='tjänst').reduce((s,t)=>s+(+t.km||0),0))} km tjänst</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">I år (${thisYear})</div>
-      <div class="stat-val">${fmtKm(yearKm)}</div>
-      <div class="stat-sub">${fmtKm(yearBizKm)} tjänst · ${pct}% tjänsteandel</div>
+      <div class="stat-label">Total kilometer</div>
+      <div class="stat-val">${fmtKm(totalKm)}</div>
+      <div class="stat-sub">${fmtKm(bizKm)} tjänst · ${fmtKm(privKm)} privat</div>
       <div class="stat-bar"><div class="stat-fill" style="width:${pct}%"></div></div>
     </div>
     <div class="stat">
-      <div class="stat-label">Skatteunderlag ${thisYear}</div>
-      <div class="stat-val" style="color:var(--blue)">${skatteavdrag} kr</div>
-      <div class="stat-sub">${fmtKm(yearBizKm)} km × 0,25 kr/km</div>
+      <div class="stat-label">Tjänsteandel</div>
+      <div class="stat-val" style="color:var(--blue)">${pct}%</div>
+      <div class="stat-sub">${fmtKm(bizKm)} av ${fmtKm(totalKm)} km</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Energiförbrukning</div>
+      <div class="stat-val" style="color:var(--green)">${totalKwh.toFixed(1)}</div>
+      <div class="stat-sub">kWh totalt</div>
     </div>
   `;
 
@@ -776,7 +746,6 @@ function renderTrips() {
       <td style="color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.note||'—'}</td>
       <td onclick="event.stopPropagation()">
         <div class="btn-row">
-          <button class="btn-icon" onclick="copyTrip('${t.id}')" title="Kopiera resa">📋</button>
           <button class="btn-icon" onclick="editTrip('${t.id}')" title="Redigera">✏️</button>
           <button class="btn-icon del" onclick="deleteTrip('${t.id}')" title="Ta bort">🗑️</button>
         </div>
@@ -800,102 +769,6 @@ function deleteTrip(id) {
   renderTrips();
   toast('Resa borttagen');
 }
-
-// ══════════════════════════════════════════
-// COPY TRIP
-// ══════════════════════════════════════════
-function copyTrip(id) {
-  const trips = getTrips();
-  const t = trips.find(x => x.id === id);
-  if (!t) return;
-  nav('add');
-  setTimeout(() => {
-    document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
-    document.getElementById('f-vehicle').value = t.vehicle || '';
-    document.getElementById('f-start-addr').value = t.startAddr || '';
-    document.getElementById('f-start-lat').value = t.startLat || '';
-    document.getElementById('f-start-lng').value = t.startLng || '';
-    document.getElementById('f-end-addr').value = t.endAddr || '';
-    document.getElementById('f-end-lat').value = t.endLat || '';
-    document.getElementById('f-end-lng').value = t.endLng || '';
-    document.getElementById('f-km').value = t.km || '';
-    document.getElementById('f-kwh').value = t.kwh || '';
-    document.getElementById('f-purpose').value = t.purpose || '';
-    document.getElementById('f-note').value = t.note || '';
-    document.getElementById('f-start-time').value = t.startTime || '';
-    document.getElementById('f-end-time').value = t.endTime || '';
-    renderFavChips();
-    updateFormMap();
-    toast('Resa kopierad — ändra datum och spara 📋', 'ok');
-  }, 200);
-}
-
-// ══════════════════════════════════════════
-// SAVED ADDRESSES (FAVOURITES)
-// ══════════════════════════════════════════
-const LS_FAVS = 'kj_favs';
-function getFavs() { try { return JSON.parse(localStorage.getItem(LS_FAVS)||'[]'); } catch { return []; } }
-function saveFavs(f) { localStorage.setItem(LS_FAVS, JSON.stringify(f)); }
-
-function addFav(type) {
-  const addr = document.getElementById('f-' + type + '-addr').value.trim();
-  const lat = document.getElementById('f-' + type + '-lat').value;
-  const lng = document.getElementById('f-' + type + '-lng').value;
-  if (!addr) { toast('Ange en adress först', 'err'); return; }
-  const label = prompt('Namn på favoriten (t.ex. Hemma, Jobbet):', addr.split(',')[0]);
-  if (!label) return;
-  const favs = getFavs();
-  if (favs.find(f => f.addr === addr)) { toast('Redan sparad', 'warn'); return; }
-  favs.push({ label, addr, lat, lng });
-  saveFavs(favs);
-  renderFavChips();
-  toast('⭐ Sparad: ' + label, 'ok');
-}
-
-function removeFav(idx) {
-  const favs = getFavs();
-  favs.splice(idx, 1);
-  saveFavs(favs);
-  renderFavChips();
-}
-
-function applyFav(type, idx) {
-  const fav = getFavs()[idx];
-  if (!fav) return;
-  document.getElementById('f-' + type + '-addr').value = fav.addr;
-  document.getElementById('f-' + type + '-lat').value = fav.lat || '';
-  document.getElementById('f-' + type + '-lng').value = fav.lng || '';
-  updateFormMap();
-  toast('📍 ' + fav.label, 'ok');
-}
-
-function renderFavChips() {
-  const favs = getFavs();
-  ['start','end'].forEach(type => {
-    const el = document.getElementById('fav-chips-' + type);
-    if (!el) return;
-    if (!favs.length) {
-      el.innerHTML = '<span style="font-size:12px;color:var(--muted)">Inga favoriter — skriv adress och klicka ⭐ Spara</span>';
-      return;
-    }
-    el.innerHTML = '';
-    favs.forEach((fav, i) => {
-      const chip = document.createElement('span');
-      chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:12px;cursor:pointer';
-      const txt = document.createTextNode('⭐ ' + fav.label + ' ');
-      const rm = document.createElement('span');
-      rm.textContent = '✕';
-      rm.title = 'Ta bort';
-      rm.style.cssText = 'color:var(--muted);font-size:11px';
-      rm.addEventListener('click', e => { e.stopPropagation(); removeFav(i); });
-      chip.appendChild(txt);
-      chip.appendChild(rm);
-      chip.addEventListener('click', () => applyFav(type, i));
-      el.appendChild(chip);
-    });
-  });
-}
-
 
 // ══════════════════════════════════════════
 // FORM + GEOCODING
@@ -1128,9 +1001,9 @@ function closeDetailModal() {
 // TESLA API
 // ══════════════════════════════════════════
 const TESLA_BASE = {
-  eu: '/fleet-eu',
-  na: '/fleet-na',
-  fe: '/fleet-fe',
+  eu: 'https://fleet-api.prd.eu.vn.cloud.tesla.com',
+  na: 'https://fleet-api.prd.na.vn.cloud.tesla.com',
+  fe: 'https://fleet-api.prd.fe.vn.cloud.tesla.com',
 };
 const TESLA_AUTH_URL = 'https://auth.tesla.com/oauth2/v3/authorize';
 const TESLA_TOKEN_URL = 'https://auth.tesla.com/oauth2/v3/token';
@@ -1169,7 +1042,7 @@ function toggleManualToken() {
   box.style.display = box.style.display === 'none' ? 'block' : 'none';
 }
 
-async function tsRequest(path, method) {
+async function tsRequest(path) {
   let token = localStorage.getItem(LS_TOKEN);
   const region = localStorage.getItem(LS_REGION) || 'eu';
   if (!token) {
@@ -1177,8 +1050,9 @@ async function tsRequest(path, method) {
     token = await tsRefreshToken();
     if (!token) throw new Error('Ingen token – logga in via Tesla OAuth');
   }
-  const fetchOpts = { method: method||'GET', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } };
-  const r = await fetch(TESLA_BASE[region] + path, fetchOpts);
+  const r = await fetch(TESLA_BASE[region] + path, {
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+  });
   if (r.status === 401) {
     // Token expired – try refresh
     const newToken = await tsRefreshToken();
@@ -1217,7 +1091,7 @@ async function tsRefreshToken() {
 async function tsOAuthLogin() {
   const clientId = document.getElementById('ts-client-id').value.trim();
   const region = document.getElementById('ts-region').value;
-  const redirectUri = document.getElementById('ts-redirect-uri').value.trim() || (window.location.origin + '/callback.html');
+  const redirectUri = document.getElementById('ts-redirect-uri').value.trim() || window.location.href.split('?')[0];
 
   if (!clientId) { toast('Ange Client ID', 'err'); return; }
 
@@ -1233,7 +1107,7 @@ async function tsOAuthLogin() {
   localStorage.setItem(LS_CLIENT, clientId);
   localStorage.setItem(LS_REGION, region);
 
-  const scopes = 'openid offline_access vehicle_device_data vehicle_cmds vehicle_location';
+  const scopes = 'openid offline_access vehicle_device_data vehicle_charging_cmds vehicle_location';
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: clientId,
@@ -1242,10 +1116,13 @@ async function tsOAuthLogin() {
     state,
     code_challenge: challenge,
     code_challenge_method: 'S256',
-    prompt: 'consent',
   });
 
-
+  // Highlight step 2
+  document.getElementById('step2-num').style.background = 'var(--accent)';
+  document.getElementById('step2-num').style.color = '#fff';
+  document.getElementById('step2-num').style.borderColor = 'var(--accent)';
+  document.getElementById('step2-title').style.color = 'var(--text)';
 
   window.location.href = TESLA_AUTH_URL + '?' + params.toString();
 }
@@ -1393,159 +1270,69 @@ async function tsRenderVehicles() {
   }
 }
 
-async function tsFetchVehicleData() {
+async function tsFetchCharges() {
   if (!localStorage.getItem(LS_TOKEN)) { toast('Anslut Tesla API först', 'err'); return; }
-  const panel = document.getElementById('ts-vehicle-data-panel');
-  panel.innerHTML = '<div class="text-muted" style="padding:16px">Hämtar fordonsdata...</div>';
+  const el = document.getElementById('ts-import-list');
+  el.innerHTML = '<div class="text-muted" style="padding:16px">Hämtar laddningar...</div>';
   try {
     if (!tsVehicles.length) {
       const data = await tsRequest('/api/1/vehicles');
       tsVehicles = data.response || [];
     }
-    if (!tsVehicles.length) {
-      panel.innerHTML = '<div class="empty"><div class="icon">🚗</div><h3>Inga fordon hittades</h3></div>';
-      return;
-    }
-    const v = tsVehicles[0];
-    const vid = v.id_s || String(v.id);
-
-    let odo = null, lat = null, lng = null, ts2 = '', debugLines = [];
-
-    // Decode token to show scopes
-    try {
-      const token = localStorage.getItem(LS_TOKEN) || '';
-      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-      debugLines.push('Token scopes: ' + (payload.scp || payload.scope || 'ej hittade'));
-      debugLines.push('Token sub: ' + (payload.sub || '?'));
-    } catch(et) { debugLines.push('Token-fel: ' + et.message); }
-
-    // Call 1: base vehicle_data → odometer
-    try {
-      const r1 = await tsRequest('/api/1/vehicles/' + vid + '/vehicle_data');
-      const resp = r1.response || {};
-      const vs = resp.vehicle_state || {};
-      odo = vs.odometer ? Math.round(vs.odometer * 1.60934) : null;
-      debugLines.push('Bas-keys: ' + Object.keys(resp).join(', '));
-    } catch(e1) { debugLines.push('Bas-anrop fel: ' + e1.message); }
-
-    // Full vehicle_data — ger drive_state.latitude = RIKTIG position (active_route_* = destination, används ej)
-    try {
-      const r2 = await tsRequest('/api/1/vehicles/' + vid + '/vehicle_data');
-      const resp2 = r2.response || {};
-      const ds = resp2.drive_state || {};
-      debugLines.push('drive_state: ' + JSON.stringify(ds).slice(0, 300));
-      lat = ds.latitude || null;
-      lng = ds.longitude || null;
-      if (lat) debugLines.push('✅ Riktig position: ' + lat.toFixed(5) + ', ' + lng.toFixed(5));
-      else if (ds.active_route_latitude) debugLines.push('⚠️ Ingen riktig pos – bilen kör med nav. Destination visas ej.');
-      if (ds.timestamp) ts2 = new Date(ds.timestamp).toLocaleString('sv-SE');
-    } catch(e2) { debugLines.push('vehicle_data-anrop fel: ' + e2.message); }
-
-    let addr = '';
-    if (lat && lng) {
-      try {
-        const geo = await fetch('https://nominatim.openstreetmap.org/reverse?lat=' + lat + '&lon=' + lng + '&format=json');
-        const gj = await geo.json();
-        addr = gj.display_name || (lat.toFixed(4) + ', ' + lng.toFixed(4));
-      } catch(eg) { addr = lat.toFixed(4) + ', ' + lng.toFixed(4); }
-    }
-    window._tsLat = lat; window._tsLng = lng; window._tsAddr = addr;
-
-    let html2 = '<div class="card mb-16" style="padding:20px">'
-      + '<div style="font-size:20px;font-weight:700;margin-bottom:16px">🚗 ' + (v.display_name||v.vin) + '</div>'
-      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">'
-      + '<div style="background:var(--bg3);border-radius:8px;padding:12px"><div style="color:var(--muted);font-size:12px;margin-bottom:4px">ODOMETER</div>'
-      + '<div style="font-size:20px;font-weight:700">' + (odo ? odo.toLocaleString('sv-SE') + ' km' : '—') + '</div></div>'
-      + '<div style="background:var(--bg3);border-radius:8px;padding:12px"><div style="color:var(--muted);font-size:12px;margin-bottom:4px">GPS</div>'
-      + '<div style="font-size:13px;font-weight:600">' + (lat ? '📍 ' + lat.toFixed(4) + ', ' + lng.toFixed(4) : '❌ Ingen') + '</div></div></div>';
-    if (addr) {
-      html2 += '<div style="background:var(--bg3);border-radius:8px;padding:12px;margin-bottom:16px">'
-        + '<div style="color:var(--muted);font-size:12px;margin-bottom:4px">POSITION' + (ts2 ? ' · ' + ts2 : '') + '</div>'
-        + '<div style="font-size:13px">' + addr + '</div></div>'
-        + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">'
-        + '<button class="btn btn-primary" onclick="startTripFromTesla()">▶ Starta resa härifrån</button>'
-        + '<button class="btn btn-sec" onclick="endTripFromTesla()">⏹ Avsluta resa här</button></div>';
-    }
-    html2 += '<details open><summary style="color:var(--muted);font-size:12px;cursor:pointer">Debug</summary>'
-      + '<div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.8;word-break:break-all">' + debugLines.join('<br>') + '</div></details></div>';
-    panel.innerHTML = html2;
-    toast(lat ? 'Position hämtad ✅' : 'Odometer hämtad', lat ? 'ok' : 'warn');
+    if (!tsVehicles.length) { el.innerHTML = '<div class="empty"><div class="icon">🚗</div><h3>Inga fordon</h3></div>'; return; }
+    const vid = tsVehicles[0].id;
+    const data = await tsRequest(`/api/1/vehicles/${vid}/recent_charges`);
+    tsCharges = (data.response || []).filter(c => c.charge_energy_added > 0);
+    if (!tsCharges.length) { el.innerHTML = '<div class="empty"><div class="icon">⚡</div><h3>Inga laddningar hittades</h3></div>'; return; }
+    el.innerHTML = tsCharges.map((c, i) => {
+      const d = new Date(c.timestamp*1000||0);
+      const dateStr = d.toLocaleDateString('sv-SE');
+      return `<div class="imp-item" id="imp-${i}">
+        <input type="checkbox" id="imp-cb-${i}" onchange="this.closest('.imp-item').classList.toggle('checked',this.checked)">
+        <div class="imp-info">
+          <div class="imp-title">Laddning ${dateStr}</div>
+          <div class="imp-sub">${c.charge_energy_added||'?'} kWh · ${c.charger_voltage||'?'}V · ${c.charging_state||''}</div>
+        </div>
+      </div>`;
+    }).join('');
+    document.getElementById('ts-import-actions').style.display = 'block';
+    toast(`${tsCharges.length} laddningar hämtade`);
   } catch(e) {
-    panel.innerHTML = '<div class="warn-box">Fel: ' + e.message + '</div>';
-    toast('Fel: ' + e.message, 'err');
+    el.innerHTML = `<div class="warn-box">Fel: ${e.message}</div>`;
+    toast('Kunde inte hämta data: ' + e.message, 'err');
   }
 }
 
-
-function startTripFromTesla() {
-  const addr = window._tsAddr || ''; const lat = window._tsLat || ''; const lng = window._tsLng || '';
-  nav('new');
-  setTimeout(() => {
-    const el = document.getElementById('start-addr'); if (el) el.value = addr;
-    const latEl = document.getElementById('start-lat'); if (latEl) latEl.value = lat;
-    const lngEl = document.getElementById('start-lng'); if (lngEl) lngEl.value = lng;
-    updateFormMap();
-    toast('Startadress ifylld från Tesla 📍', 'ok');
-  }, 300);
+function tsImportSelected() {
+  const trips = getTrips();
+  let count = 0;
+  tsCharges.forEach((c, i) => {
+    const cb = document.getElementById(`imp-cb-${i}`);
+    if (!cb || !cb.checked) return;
+    const d = new Date(c.timestamp*1000||0);
+    const dateStr = d.toISOString().slice(0,10);
+    trips.push({
+      id: uid(),
+      date: dateStr,
+      startAddr: 'Okänd (importerad från Tesla)',
+      endAddr: c.charger_type ? `Laddstation (${c.charger_type})` : 'Laddstation',
+      km: '',
+      kwh: c.charge_energy_added||'',
+      purpose: 'privat',
+      note: `Import från Tesla API · ${c.charging_state||''}`,
+      vehicle: tsVehicles[0]?.display_name || 'Tesla',
+      startLat: '', startLng: '', endLat: '', endLng: '',
+    });
+    count++;
+  });
+  saveTrips(trips);
+  toast(`✅ ${count} resor importerade`, 'ok');
+  nav('trips');
 }
-
-function endTripFromTesla() {
-  const addr = window._tsAddr || ''; const lat = window._tsLat || ''; const lng = window._tsLng || '';
-  nav('new');
-  setTimeout(() => {
-    const el = document.getElementById('end-addr'); if (el) el.value = addr;
-    const latEl = document.getElementById('end-lat'); if (latEl) latEl.value = lat;
-    const lngEl = document.getElementById('end-lng'); if (lngEl) lngEl.value = lng;
-    updateFormMap();
-    toast('Slutadress ifylld från Tesla 📍', 'ok');
-  }, 300);
-}
-
 
 // ══════════════════════════════════════════
 // JSON IMPORT
 // ══════════════════════════════════════════
-function importCSV() {
-  const file = document.getElementById('csv-import-file').files[0];
-  if (!file) { toast('Välj en CSV-fil', 'err'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const lines = e.target.result.split('\n').filter(l => l.trim());
-      const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim());
-      let count = 0;
-      const trips = getTrips();
-      const existing = new Set(trips.map(t => t.date + t.startAddr + t.endAddr));
-      for (let i = 1; i < lines.length; i++) {
-        const vals = lines[i].match(/(".*?"|[^,]+)(?=,|$)/g) || [];
-        const clean = vals.map(v => v.replace(/^"|"$/g,'').trim());
-        const row = {};
-        headers.forEach((h,idx) => row[h] = clean[idx] || '');
-        const trip = {
-          id: Date.now().toString() + i,
-          date: row['Datum'] || row['date'] || '',
-          startTime: row['Starttid'] || row['startTime'] || '',
-          endTime: row['Sluttid'] || row['endTime'] || '',
-          startAddr: row['Från'] || row['startAddr'] || '',
-          endAddr: row['Till'] || row['endAddr'] || '',
-          km: parseFloat(row['Kilometer'] || row['km'] || 0) || '',
-          kwh: parseFloat(row['kWh'] || row['kwh'] || 0) || '',
-          purpose: row['Syfte'] || row['purpose'] || 'privat',
-          vehicle: row['Fordon'] || row['vehicle'] || '',
-          note: row['Anteckning'] || row['note'] || ''
-        };
-        if (!trip.date) continue;
-        const key = trip.date + trip.startAddr + trip.endAddr;
-        if (!existing.has(key)) { trips.unshift(trip); existing.add(key); count++; }
-      }
-      saveTrips(trips);
-      renderOverview();
-      toast(`✅ ${count} resor importerade från CSV`, 'ok');
-    } catch(e) { toast('Fel vid CSV-import: ' + e.message, 'err'); }
-  };
-  reader.readAsText(file, 'utf-8');
-}
-
 function importJSON() {
   const file = document.getElementById('json-import-file').files[0];
   if (!file) { toast('Välj en JSON-fil', 'err'); return; }
@@ -1659,208 +1446,61 @@ function exportCSV() {
   toast('✅ CSV exporterad');
 }
 
-
-// ══════════════════════════════════════════
-// AUTO-LOG
-// ══════════════════════════════════════════
-const LS_AUTOLOG = 'kj_autolog_trips';
-let alActive = false;
-let alInterval = null;
-let alCarState = 'unknown'; // 'parked' | 'driving'
-let alTripData = null;      // trip in progress
-let alWakeLock = null;
-let alLastPoll = null;
-let alPollCount = 0;
-const AL_INTERVAL_MS = 60000; // 60 seconds
-
-function getAutoTrips() { try { return JSON.parse(localStorage.getItem(LS_AUTOLOG)||'[]'); } catch(e){ return []; } }
-function saveAutoTrips(t) { localStorage.setItem(LS_AUTOLOG, JSON.stringify(t)); }
-
-async function autoLogToggle() {
-  if (!localStorage.getItem(LS_TOKEN)) { toast('Anslut Tesla API först', 'err'); return; }
-  if (alActive) { autoLogStop(); } else { await autoLogStart(); }
-}
-
-async function autoLogStart() {
-  alActive = true;
-  alCarState = 'unknown';
-  document.getElementById('al-btn').textContent = '⏹ Stopp';
-  document.getElementById('al-btn').style.background = 'var(--accent)';
-  // Request wake lock to keep screen/tab alive
-  try {
-    if ('wakeLock' in navigator) {
-      alWakeLock = await navigator.wakeLock.request('screen');
-      alWakeLock.addEventListener('release', () => { if (alActive) navigator.wakeLock.request('screen').then(wl => alWakeLock = wl).catch(()=>{}); });
-    }
-  } catch(e) {}
-  // Request notification permission
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
-  }
-  alUpdateUI('🟢 Autologgning aktiv', 'Kollar bilen var 60:e sekund...');
-  // Poll immediately, then on interval
-  await autoLogPoll();
-  alInterval = setInterval(autoLogPoll, AL_INTERVAL_MS);
-  toast('Autologgning startad ✅', 'ok');
-}
-
-function autoLogStop() {
-  alActive = false;
-  clearInterval(alInterval);
-  alInterval = null;
-  if (alWakeLock) { alWakeLock.release().catch(()=>{}); alWakeLock = null; }
-  // If trip was in progress, save it as incomplete
-  if (alTripData) {
-    toast('Pågående resa avbröts vid stopp', 'warn');
-    alTripData = null;
-  }
-  alCarState = 'unknown';
-  document.getElementById('al-btn').textContent = '▶ Starta';
-  document.getElementById('al-btn').style.background = '';
-  document.getElementById('al-dot').className = 'autolog-dot';
-  alUpdateUI('Autologgning inaktiv', 'Tryck Starta för att börja logga automatiskt');
-  toast('Autologgning stoppad', 'warn');
-}
-
-// Last known parked position (used as trip start — avoids navigation destination bug)
-let alLastParkedPos = null; // {lat, lng, addr, odo}
-
-async function alGetRealPosition(vid) {
-  // Full vehicle_data call gives real drive_state.latitude (not active_route_*)
-  let lat = null, lng = null, odo = null, shiftState = 'P', speed = 0;
-  const r = await tsRequest('/api/1/vehicles/' + vid + '/vehicle_data');
-  const resp = r.response || {};
-  const ds = resp.drive_state || {};
-  const vs = resp.vehicle_state || {};
-  // Real position: latitude/longitude directly (not active_route_*)
-  lat = ds.latitude || null;
-  lng = ds.longitude || null;
-  shiftState = ds.shift_state || 'P';
-  speed = ds.speed || 0;
-  if (vs.odometer) odo = Math.round(vs.odometer * 1.60934);
-  return { lat, lng, odo, shiftState, speed, ds };
-}
-
-async function autoLogPoll() {
-  if (!alActive) return;
-  alPollCount++;
-  alLastPoll = new Date();
-  try {
-    if (!tsVehicles.length) {
-      const vd = await tsRequest('/api/1/vehicles');
-      tsVehicles = vd.response || [];
-    }
-    if (!tsVehicles.length) { alUpdateUI('🟡 Autologgning aktiv', 'Inga fordon hittade'); return; }
-    const vid = tsVehicles[0].id;
-    const ts2 = alLastPoll.toLocaleTimeString('sv-SE', {hour:'2-digit',minute:'2-digit'});
-
-    let lat, lng, odo, shiftState, speed;
+function importCSV() {
+  const file = document.getElementById('csv-import-file').files[0];
+  if (!file) { toast('Välj en CSV-fil', 'err'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
     try {
-      ({ lat, lng, odo, shiftState, speed } = await alGetRealPosition(vid));
-    } catch(e) { alUpdateUI('🟡 Autologgning aktiv', 'Fel: ' + e.message); return; }
-
-    const isDriving = shiftState === 'D' || shiftState === 'R' || (shiftState !== 'P' && speed > 0);
-
-    // While parked: save real position as potential trip start
-    if (!isDriving && lat) {
-      // Reverse geocode only when position changes significantly
-      if (!alLastParkedPos || Math.abs(lat - alLastParkedPos.lat) > 0.0005 || Math.abs(lng - alLastParkedPos.lng) > 0.0005) {
-        let addr = lat.toFixed(4) + ', ' + lng.toFixed(4);
-        try { const g = await fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json'); const gj = await g.json(); addr = gj.display_name || addr; } catch(e) {}
-        alLastParkedPos = { lat, lng, addr, odo };
-      } else if (odo) { alLastParkedPos.odo = odo; }
-    }
-
-    if (isDriving && alCarState !== 'driving') {
-      // TRIP START — use last parked position if available, else try current GPS
-      alCarState = 'driving';
-      let startPos = alLastParkedPos;
-      if (!startPos && lat) {
-        // No cached parked position — use current GPS as approximate start
-        let addr = lat.toFixed(4) + ', ' + lng.toFixed(4);
-        try { const g = await fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json'); const gj = await g.json(); addr = gj.display_name || addr; } catch(e) {}
-        startPos = { lat, lng, addr, odo };
-      }
-      if (!startPos) startPos = { lat: null, lng: null, addr: 'Okänd startadress', odo };
-      alTripData = { startTime: alLastPoll.toISOString(), startAddr: startPos.addr, startLat: startPos.lat, startLng: startPos.lng, startOdo: startPos.odo || odo, date: alLastPoll.toISOString().slice(0,10) };
-      alUpdateUI('🚗 Kör nu!', 'Start: ' + ts2 + ' · ' + (startPos.addr||'').split(',')[0]);
-      document.getElementById('al-dot').className = 'autolog-dot driving';
-      alSendNotification('🚗 Resa startad', (startPos.addr||'').split(',')[0] || 'Kör nu');
-
-    } else if (!isDriving && alCarState === 'driving') {
-      // TRIP END — use current real position; retry GPS a few times if null
-      alCarState = 'parked';
-      let endLat = lat, endLng = lng;
-      // Retry up to 3 times if no GPS (car just parked, may need a moment)
-      for (let i = 0; i < 3 && !endLat; i++) {
-        await new Promise(r => setTimeout(r, 5000));
-        try { const rr = await alGetRealPosition(vid); endLat = rr.lat; endLng = rr.lng; } catch(e) {}
-      }
-      let endAddr = endLat ? endLat.toFixed(4)+','+endLng.toFixed(4) : 'Okänd slutadress';
-      if (endLat) { try { const g = await fetch('https://nominatim.openstreetmap.org/reverse?lat='+endLat+'&lon='+endLng+'&format=json'); const gj = await g.json(); endAddr = gj.display_name || endAddr; } catch(e) {} }
-      lat = endLat; lng = endLng;
-      if (alTripData) {
-        const kmDiff = (odo && alTripData.startOdo) ? Math.round(odo - alTripData.startOdo) : null;
+      const lines = e.target.result.split('\n').filter(l => l.trim());
+      if (lines.length < 2) { toast('CSV-filen är tom eller ogiltig', 'err'); return; }
+      // Parse header
+      const parseCSVLine = line => {
+        const result = [];
+        let cur = '', inQ = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') {
+            if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+            else inQ = !inQ;
+          } else if (ch === ',' && !inQ) { result.push(cur); cur = ''; }
+          else cur += ch;
+        }
+        result.push(cur);
+        return result.map(s => s.trim());
+      };
+      const headers = parseCSVLine(lines[0]);
+      const idx = h => headers.findIndex(x => x.replace(/"/g,'').toLowerCase() === h.toLowerCase());
+      const iDate = idx('Datum'), iStart = idx('Starttid'), iEnd = idx('Sluttid');
+      const iFrom = idx('Från'), iTo = idx('Till'), iKm = idx('Kilometer');
+      const iKwh = idx('kWh'), iPurp = idx('Syfte'), iVeh = idx('Fordon'), iNote = idx('Anteckning');
+      let count = 0;
+      const trips = getTrips();
+      const existing = new Set(trips.map(t => (t.date||'')+'|'+(t.startAddr||'')+'|'+(t.endAddr||'')));
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCSVLine(lines[i]);
+        if (cols.length < 4) continue;
         const trip = {
-          id: Date.now().toString(),
-          date: alTripData.date,
-          startTime: alTripData.startTime.slice(11,16),
-          endTime: alLastPoll.toISOString().slice(11,16),
-          startAddr: alTripData.startAddr,
-          endAddr: endAddr,
-          startLat: alTripData.startLat, startLng: alTripData.startLng,
-          endLat: lat, endLng: lng,
-          km: kmDiff || '',
-          kwh: '', purpose: 'tjänst',
-          vehicle: tsVehicles[0] ? (tsVehicles[0].display_name || tsVehicles[0].vin) : 'Tesla',
-          note: '📍 Autologgad', autoLogged: true
+          id: Date.now() + i,
+          date: iDate>=0 ? cols[iDate] : '',
+          startTime: iStart>=0 ? cols[iStart] : '',
+          endTime: iEnd>=0 ? cols[iEnd] : '',
+          startAddr: iFrom>=0 ? cols[iFrom] : '',
+          endAddr: iTo>=0 ? cols[iTo] : '',
+          km: iKm>=0 ? parseFloat(cols[iKm])||0 : 0,
+          kwh: iKwh>=0 ? parseFloat(cols[iKwh])||0 : 0,
+          purpose: iPurp>=0 ? cols[iPurp] : 'privat',
+          vehicle: iVeh>=0 ? cols[iVeh] : '',
+          note: iNote>=0 ? cols[iNote] : ''
         };
-        const trips = getTrips(); trips.unshift(trip); saveTrips(trips);
-        alTripData = null;
-        if (lat) alLastParkedPos = { lat, lng, addr: endAddr, odo };
-        alUpdateUI('🅿 Parkerad', 'Resa sparad · ' + ts2 + (kmDiff ? ' · ' + kmDiff + ' km' : ''));
-        document.getElementById('al-dot').className = 'autolog-dot active';
-        alSendNotification('✅ Resa sparad!', (kmDiff ? kmDiff + ' km · ' : '') + 'Till: ' + endAddr.split(',')[0]);
-        toast('✅ Resa autologgad! Fyll i syfte under Resor.', 'ok');
-        renderOverview(); alRenderTrips();
+        const key = trip.date+'|'+trip.startAddr+'|'+trip.endAddr;
+        if (!existing.has(key)) { trips.push(trip); existing.add(key); count++; }
       }
-    } else if (!isDriving) {
-      alCarState = 'parked';
-      document.getElementById('al-dot').className = 'autolog-dot active';
-      const posInfo = alLastParkedPos ? alLastParkedPos.addr.split(',')[0] : (lat ? lat.toFixed(4)+','+lng.toFixed(4) : 'Okänd');
-      alUpdateUI('🅿 Parkerad · Väntar...', 'Koll ' + ts2 + ' · ' + posInfo + (odo ? ' · ' + odo.toLocaleString('sv-SE') + ' km' : ''));
-    } else {
-      alUpdateUI('🚗 Kör nu!', 'Hastighet: ' + speed + ' km/h · ' + ts2);
-    }
-  } catch(e) {
-    alUpdateUI('⚠️ Fel vid polling', e.message);
-  }
-}
-
-function alUpdateUI(title, sub) {
-  const el = document.getElementById('al-title'); if (el) el.textContent = title;
-  const el2 = document.getElementById('al-sub'); if (el2) el2.textContent = sub;
-}
-
-function alSendNotification(title, body) {
-  if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification(title, { body, icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🚗</text></svg>' });
-  }
-}
-
-function alRenderTrips() {
-  const el = document.getElementById('al-trips-list');
-  if (!el) return;
-  const trips = getTrips().filter(t => t.autoLogged).slice(0, 5);
-  if (!trips.length) { el.innerHTML = ''; return; }
-  el.innerHTML = '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;margin-top:4px">Senast autologgade resor:</div>'
-    + trips.map(t => `<div class="autolog-trip-item">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="font-weight:600;font-size:13px">${t.date} ${t.startTime||''}-${t.endTime||''}</span>
-        <span style="color:var(--green);font-size:12px">${t.km ? t.km+' km' : '?km'}</span>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">${(t.startAddr||'').split(',')[0]} → ${(t.endAddr||'').split(',')[0]}</div>
-    </div>`).join('');
+      saveTrips(trips); renderOverview();
+      toast('✅ ' + count + ' resor importerade från CSV');
+    } catch(err) { toast('Fel vid import: ' + err.message, 'err'); }
+  };
+  reader.readAsText(file, 'utf-8');
 }
 
 // ══════════════════════════════════════════
@@ -1869,20 +1509,32 @@ function alRenderTrips() {
 document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
 document.getElementById('f-vehicle').value = localStorage.getItem('last_vehicle') || '';
 
-// Check for OAuth callback code stored by callback.html
-(function() {
+// Pre-fill redirect URI
+const defaultRedirect = window.location.href.split('?')[0];
+const savedRedirect = localStorage.getItem('ts_redirect_uri');
+// Default redirect URI points to callback.html in same folder
+const callbackDefault = defaultRedirect.replace(/\/[^\/]*$/, '/callback.html').replace(/^file:.*/, 'https://cheerful-daffodil-b25f4b.netlify.app/callback.html');
+document.getElementById('ts-redirect-uri').value = savedRedirect || callbackDefault;
+
+// Restore Tesla connection status
+if (localStorage.getItem(LS_TOKEN)) {
+  tsUpdateStatus(true, `Token sparad · region ${localStorage.getItem(LS_REGION)||'eu'}`);
+}
+
+// Handle OAuth callback
+if (window.location.search.includes('code=')) {
+  tsHandleCallback();
+} else if (localStorage.getItem('ts_oauth_code')) {
   const code = localStorage.getItem('ts_oauth_code');
   const state = localStorage.getItem('ts_oauth_state');
-  if (code) {
-    localStorage.removeItem('ts_oauth_code');
-    localStorage.removeItem('ts_oauth_state');
-    tsExchangeCode(code, state);
-  }
-})();
-
-// Update Tesla connection status
-tsUpdateStatus(!!localStorage.getItem(LS_TOKEN));
-
-// Start on overview
-nav('overview');
-</script></body></html>
+  localStorage.removeItem('ts_oauth_code');
+  localStorage.removeItem('ts_oauth_state');
+  renderOverview();
+  nav('tesla');
+  tsExchangeCode(code, state);
+} else {
+  renderOverview();
+}
+</script>
+</body>
+</html>
