@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/fleet-eu/:path*", "destination": "https://fleet-api.prd.eu.vn.cloud.tesla.com/:path*" },
+    { "source": "/fleet-na/:path*", "destination": "https://fleet-api.prd.na.vn.cloud.tesla.com/:path*" },
+    { "source": "/fleet-fe/:path*", "destination": "https://fleet-api.prd.fe.vn.cloud.tesla.com/:path*" }
+  ]
+}
